@@ -1,7 +1,9 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import { getDocument } from 'pdfjs-dist/build/pdf';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
 // Initialize PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export interface BloodTestResult {
   markerName: string;
@@ -12,7 +14,7 @@ export interface BloodTestResult {
 
 export const extractTextFromPDF = async (arrayBuffer: ArrayBuffer): Promise<string> => {
   console.log('Loading PDF document');
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf = await getDocument({ data: arrayBuffer }).promise;
   
   let fullText = '';
   
