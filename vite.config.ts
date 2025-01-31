@@ -5,7 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    react(),
+    react({
+      jsxRuntime: 'automatic'
+    }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   server: {
@@ -15,14 +17,16 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-    },
+      'react/jsx-runtime': 'react/jsx-runtime.js'
+    }
   },
   optimizeDeps: {
-    include: ['pdfjs-dist']
+    include: ['pdfjs-dist', 'react', 'react-dom']
   },
   build: {
     commonjsOptions: {
-      include: [/pdfjs-dist/]
+      include: [/pdfjs-dist/, /node_modules/],
+      transformMixedEsModules: true
     }
   }
 }));
