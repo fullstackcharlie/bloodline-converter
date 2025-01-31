@@ -1,8 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import { PDFWorker } from 'pdfjs-dist/types/src/display/worker_options';
 
 // Initialize PDF.js worker
-const worker = new PDFWorker();
+const worker = new pdfjsLib.PDFWorker();
 pdfjsLib.GlobalWorkerOptions.workerPort = worker;
 
 export interface BloodTestResult {
