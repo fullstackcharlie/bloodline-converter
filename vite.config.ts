@@ -21,12 +21,8 @@ export default defineConfig(({ mode }) => ({
     include: ['pdfjs-dist']
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          pdfjs: ['pdfjs-dist']
-        }
-      }
+    commonjsOptions: {
+      include: [/pdfjs-dist/]
     }
   }
 }));
