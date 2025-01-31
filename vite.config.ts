@@ -1,17 +1,25 @@
-import path from "path";
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
 
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 8080
+  },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
+  },
+  optimizeDeps: {
+    include: ['pdfjs-dist']
   },
   build: {
     rollupOptions: {
-      external: ['pdfjs-dist/build/pdf.worker.entry'],
-    },
-  },
-}));
+      external: [
+        'pdfjs-dist/build/pdf.worker.entry'
+      ]
+    }
+  }
+});
