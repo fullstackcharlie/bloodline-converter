@@ -2,7 +2,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize PDF.js worker
 const worker = new pdfjsLib.PDFWorker();
-pdfjsLib.GlobalWorkerOptions.workerPort = worker;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export interface BloodTestResult {
   markerName: string;
