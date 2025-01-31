@@ -15,21 +15,110 @@ const Index = () => {
     // For now, we'll simulate processing with sample data
     setTimeout(() => {
       const sampleData: BloodTestResult[] = [
+        // Red Blood Cells
         {
-          markerName: "Hemoglobin",
-          unit: "g/dL",
-          measuredValue: "14.5",
-          referenceValue: "13.5-17.5"
+          markerName: "Haemoglobin",
+          unit: "g/L",
+          measuredValue: "146",
+          referenceValue: "130-180"
         },
         {
-          markerName: "White Blood Cells",
-          unit: "K/µL",
-          measuredValue: "7.8",
-          referenceValue: "4.5-11.0"
+          markerName: "Haematocrit",
+          unit: "L/L",
+          measuredValue: "0.435",
+          referenceValue: "0.4-0.52"
+        },
+        {
+          markerName: "Red Cell Count",
+          unit: "10^12/L",
+          measuredValue: "4.78",
+          referenceValue: "4.4-6.5"
+        },
+        {
+          markerName: "MCV",
+          unit: "fL",
+          measuredValue: "91.0",
+          referenceValue: "80-100"
+        },
+        {
+          markerName: "MCH",
+          unit: "pg",
+          measuredValue: "30.6",
+          referenceValue: "27-32"
+        },
+        // White Blood Cells
+        {
+          markerName: "White Cell Count",
+          unit: "10^9/L",
+          measuredValue: "4.5",
+          referenceValue: "3-11"
+        },
+        {
+          markerName: "Neutrophils",
+          unit: "10^9/L",
+          measuredValue: "2.6",
+          referenceValue: "2-7.5"
+        },
+        {
+          markerName: "Lymphocytes",
+          unit: "10^9/L",
+          measuredValue: "1.80",
+          referenceValue: "1.5-4.5"
+        },
+        // Clotting Status
+        {
+          markerName: "Platelet Count",
+          unit: "10^9/L",
+          measuredValue: "194",
+          referenceValue: "150-450"
+        },
+        {
+          markerName: "MPV",
+          unit: "fL",
+          measuredValue: "11.2",
+          referenceValue: "7-13"
+        },
+        // Kidney Health
+        {
+          markerName: "Urea",
+          unit: "mmol/L",
+          measuredValue: "5.7",
+          referenceValue: "2.5-7.8"
+        },
+        {
+          markerName: "Creatinine",
+          unit: "umol/L",
+          measuredValue: "113",
+          referenceValue: "60-120"
+        },
+        {
+          markerName: "eGFR",
+          unit: "ml/min/1.73m2",
+          measuredValue: "70",
+          referenceValue: "≥ 60"
+        },
+        // Liver Health
+        {
+          markerName: "Bilirubin",
+          unit: "umol/L",
+          measuredValue: "10",
+          referenceValue: "< 22"
+        },
+        {
+          markerName: "ALP",
+          unit: "U/L",
+          measuredValue: "74",
+          referenceValue: "30-130"
+        },
+        {
+          markerName: "ALT",
+          unit: "U/L",
+          measuredValue: "23",
+          referenceValue: "< 45"
         }
       ];
       setResults(sampleData);
-      setLoading(true);
+      setLoading(false);
       toast.success('File processed successfully');
     }, 1500);
   };
