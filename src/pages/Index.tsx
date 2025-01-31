@@ -4,123 +4,111 @@ import ResultsTable, { BloodTestResult } from '../components/ResultsTable';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Initialize PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const Index = () => {
   const [results, setResults] = useState<BloodTestResult[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const extractMarkers = (text: string): BloodTestResult[] => {
+    console.log('Extracting markers from text:', text);
+    
+    // Split text into lines
+    const lines = text.split('\n');
+    const markers: BloodTestResult[] = [];
+    
+    // Regular expressions for identifying potential blood test results
+    const numberPattern = /[-+]?\d*\.?\d+/;
+    const unitPatterns = [
+      /g\/L/i, /L\/L/i, /10\^[0-9]+\/L/i, /fL/i, /pg/i, 
+      /mmol\/L/i, /umol\/L/i, /U\/L/i, /ml\/min/i
+    ];
+    
+    // Pattern for reference ranges
+    const rangePattern = /[<>]?\s*\d+\.?\d*(?:\s*[-–]\s*\d+\.?\d*)?/;
+
+    lines.forEach((line) => {
+      console.log('Processing line:', line);
+      
+      // Check if line contains both a number and a unit
+      const hasNumber = numberPattern.test(line);
+      const hasUnit = unitPatterns.some(pattern => pattern.test(line));
+      
+      if (hasNumber && hasUnit) {
+        // Split line into parts
+        const parts = line.split(/\s+/);
+        
+        // Find the measured value (first number in the line)
+        const measuredValue = parts.find(part => numberPattern.test(part)) || '';
+        
+        // Find the unit
+        const unit = parts.find(part => unitPatterns.some(pattern => pattern.test(part))) || '';
+        
+        // Find reference range (typically at the end of the line)
+        const referenceValue = parts
+          .join(' ')
+          .match(rangePattern)?.[0] || '';
+        
+        // The marker name is typically the text before the value and unit
+        const valueIndex = parts.findIndex(part => numberPattern.test(part));
+        const markerName = parts.slice(0, valueIndex).join(' ').trim();
+        
+        if (markerName && unit && measuredValue) {
+          console.log('Found marker:', { markerName, unit, measuredValue, referenceValue });
+          markers.push({
+            markerName,
+            unit,
+            measuredValue,
+            referenceValue: referenceValue || 'Not specified'
+          });
+        }
+      }
+    });
+    
+    return markers;
+  };
+
   const handleFileSelect = async (file: File) => {
     setLoading(true);
-    // TODO: Implement actual PDF parsing logic
-    // For now, we'll simulate processing with sample data
-    setTimeout(() => {
-      const sampleData: BloodTestResult[] = [
-        // Red Blood Cells
-        {
-          markerName: "Haemoglobin",
-          unit: "g/L",
-          measuredValue: "146",
-          referenceValue: "130-180"
-        },
-        {
-          markerName: "Haematocrit",
-          unit: "L/L",
-          measuredValue: "0.435",
-          referenceValue: "0.4-0.52"
-        },
-        {
-          markerName: "Red Cell Count",
-          unit: "10^12/L",
-          measuredValue: "4.78",
-          referenceValue: "4.4-6.5"
-        },
-        {
-          markerName: "MCV",
-          unit: "fL",
-          measuredValue: "91.0",
-          referenceValue: "80-100"
-        },
-        {
-          markerName: "MCH",
-          unit: "pg",
-          measuredValue: "30.6",
-          referenceValue: "27-32"
-        },
-        // White Blood Cells
-        {
-          markerName: "White Cell Count",
-          unit: "10^9/L",
-          measuredValue: "4.5",
-          referenceValue: "3-11"
-        },
-        {
-          markerName: "Neutrophils",
-          unit: "10^9/L",
-          measuredValue: "2.6",
-          referenceValue: "2-7.5"
-        },
-        {
-          markerName: "Lymphocytes",
-          unit: "10^9/L",
-          measuredValue: "1.80",
-          referenceValue: "1.5-4.5"
-        },
-        // Clotting Status
-        {
-          markerName: "Platelet Count",
-          unit: "10^9/L",
-          measuredValue: "194",
-          referenceValue: "150-450"
-        },
-        {
-          markerName: "MPV",
-          unit: "fL",
-          measuredValue: "11.2",
-          referenceValue: "7-13"
-        },
-        // Kidney Health
-        {
-          markerName: "Urea",
-          unit: "mmol/L",
-          measuredValue: "5.7",
-          referenceValue: "2.5-7.8"
-        },
-        {
-          markerName: "Creatinine",
-          unit: "umol/L",
-          measuredValue: "113",
-          referenceValue: "60-120"
-        },
-        {
-          markerName: "eGFR",
-          unit: "ml/min/1.73m2",
-          measuredValue: "70",
-          referenceValue: "≥ 60"
-        },
-        // Liver Health
-        {
-          markerName: "Bilirubin",
-          unit: "umol/L",
-          measuredValue: "10",
-          referenceValue: "< 22"
-        },
-        {
-          markerName: "ALP",
-          unit: "U/L",
-          measuredValue: "74",
-          referenceValue: "30-130"
-        },
-        {
-          markerName: "ALT",
-          unit: "U/L",
-          measuredValue: "23",
-          referenceValue: "< 45"
-        }
-      ];
-      setResults(sampleData);
+    try {
+      console.log('Processing file:', file.name);
+      
+      // Load the PDF file
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      
+      let fullText = '';
+      
+      // Extract text from all pages
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        fullText += pageText + '\n';
+      }
+      
+      console.log('Extracted full text:', fullText);
+      
+      // Extract markers from the text
+      const extractedResults = extractMarkers(fullText);
+      
+      if (extractedResults.length === 0) {
+        toast.error('No blood test results found in the PDF');
+      } else {
+        setResults(extractedResults);
+        toast.success(`Found ${extractedResults.length} test results`);
+      }
+    } catch (error) {
+      console.error('Error processing PDF:', error);
+      toast.error('Error processing PDF file');
+    } finally {
       setLoading(false);
-      toast.success('File processed successfully');
-    }, 1500);
+    }
   };
 
   const handleDownload = () => {
